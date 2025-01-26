@@ -1,0 +1,45 @@
+# Ignorar o ambiente virtual
+venv/
+
+# Ignorar arquivos de variáveis de ambiente
+.env
+
+# Ignorar arquivos e pastas temporários do sistema operacional
+.DS_Store
+Thumbs.db
+
+# Ignorar arquivos gerados pelo Python
+*.pyc
+*.pyo
+__pycache__/
+
+# Ignorar logs e arquivos de debug
+*.log
+debug.log
+
+# Ignorar arquivos de configurações de IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignorar modelos treinados e arquivos grandes
+*.keras
+*.h5
+*.pickle
+*.pkl
+labels.dat
+
+# Ignorar pastas de imagens processadas (se aplicável)
+teste_metodo/
+images/
+letter_field
+capchas/
+base_letters/
+bd_filtered/
+identified/
+
+# Ignorar backups ou arquivos temporários
+*.bak
+*.tmp
+~$*
