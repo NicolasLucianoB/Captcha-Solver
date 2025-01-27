@@ -1,6 +1,6 @@
 # BreakCaptcha
 
-BreakCaptcha is a Python-based project designed to preprocess, train, and solve CAPTCHA images using computer vision and machine learning techniques. This project demonstrates a complete pipeline from image preprocessing to model training and CAPTCHA resolution.
+Capcha Solver is a Python-based project designed to preprocess, train, and solve CAPTCHA images using computer vision and machine learning techniques. This project demonstrates a complete pipeline from image preprocessing to model training and CAPTCHA resolution.
 
 ---
 
@@ -33,7 +33,7 @@ BreakCaptcha is a project built to showcase expertise in Python programming, mac
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/BreakCaptcha.git
+   git clone https://github.com/yourusername/captcha-solver.git
    cd BreakCaptcha
    ```
 2. Install the required dependencies:
@@ -75,7 +75,7 @@ python solve_captcha.py
 ## Project Structure
 
 ```plaintext
-BreakCaptcha/
+Capcha Solver/
 ├── preprocess.py       # Script for preprocessing CAPTCHA images
 ├── train_model.py      # Script for training the CNN model
 ├── solve_captcha.py    # Script for solving CAPTCHA challenges
