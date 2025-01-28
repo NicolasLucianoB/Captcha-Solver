@@ -12,78 +12,107 @@ from tensorflow.keras.models import Sequential
 
 
 def resize_image(image, width, height):
-    """Função para redimensionar a imagem, mantendo a proporção."""
+    """
+    Resize an image to the specified width and height.
+    Maintains the aspect ratio and handles errors gracefully.
+    """
     try:
         resized_image = cv2.resize(image, (width, height))
         return resized_image
     except cv2.error as e:
-        print(f"Erro ao redimensionar a imagem: {e}")
+        print(f"Error resizing the image: {e}")
         return None
 
+
 def load_and_preprocess_images(base_letters_file):
-    """Função para carregar, processar e redimensionar as imagens."""
+    """
+    Load images from a directory, preprocess them, and extract labels.
+    
+    Args:
+        base_letters_file (str): Path to the directory containing labeled images.
+    
+    Returns:
+        datas (np.ndarray): Array of processed images.
+        labels (np.ndarray): Array of corresponding labels.
+    """
     datas = []
     labels = []
 
     images = paths.list_images(base_letters_file)
 
     for f in images:
-        label = f.split(os.path.sep)[-2]
+        label = f.split(os.path.sep)[-2]  # Extract label from folder name
         
         try:
-            # Ler a imagem
+            # Read the image
             image = cv2.imread(f)
             if image is None:
-                print(f"Erro ao ler a imagem {f}")
+                print(f"Error reading the image {f}")
                 continue
             
-            # Converter para escala de cinza
+            # Convert image to grayscale
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-            # Redimensionar para 127x127
+            # Resize the image to 127x127
             image_resized = resize_image(image, 127, 127)
             if image_resized is None:
-                print(f"Erro ao redimensionar a imagem {f}")
+                print(f"Error resizing the image {f}")
                 continue
 
-            # Adicionar a dimensão de canal
+            # Add channel dimension (for grayscale images)
             image_resized = np.expand_dims(image_resized, axis=-1)
 
             datas.append(image_resized)
             labels.append(label)
         
         except Exception as e:
-            print(f"Erro ao processar a imagem {f}: {e}")
+            print(f"Error processing the image {f}: {e}")
     
     datas = np.array(datas)
     labels = np.array(labels)
     
     if len(datas) == 0 or len(labels) == 0:
-        raise ValueError("Nenhuma imagem válida foi carregada para o treinamento.")
+        raise ValueError("No valid images were loaded for training.")
     
     return datas, labels
 
+
 def prepare_data(datas, labels):
-    """Função para normalizar e dividir os dados em treino e teste."""
-    # Normalizar as imagens
+    """
+    Normalize images, split data into training and testing sets, and encode labels.
+    
+    Args:
+        datas (np.ndarray): Array of image data.
+        labels (np.ndarray): Array of image labels.
+    
+    Returns:
+        x_train, x_test, y_train, y_test: Training and testing datasets.
+    """
+    # Normalize the image data
     datas = datas.astype("float32") / 255.0
 
-    # Dividir os dados em treino e teste
+    # Split data into training and testing sets
     x_train, x_test, y_train, y_test = train_test_split(datas, labels, test_size=0.25, random_state=42)
 
-    # Codificar as labels
+    # Encode the labels
     lb = LabelBinarizer().fit(y_train)
     y_train = lb.transform(y_train)
     y_test = lb.transform(y_test)
     
-    # Salvar as labels em arquivo pickle
+    # Save the label encoder to a file
     with open("labels.dat", "wb") as pickle_file:
         pickle.dump(lb, pickle_file)
 
     return x_train, x_test, y_train, y_test
 
+
 def build_model():
-    """Função para construir o modelo de rede neural."""
+    """
+    Build a Convolutional Neural Network model.
+    
+    Returns:
+        model: Compiled Keras Sequential model.
+    """
     model = Sequential()
     model.add(Conv2D(32, (3, 3), activation="relu", input_shape=(127, 127, 1)))
     model.add(MaxPooling2D(pool_size=(2, 2)))
@@ -92,34 +121,38 @@ def build_model():
     model.add(Flatten())
     model.add(Dense(64, activation="relu"))
     model.add(Dense(32, activation="relu"))
-    model.add(Dense(26, activation="softmax"))
+    model.add(Dense(26, activation="softmax"))  # 26 output classes (e.g., A-Z)
 
     model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
     return model
 
+
 def main():
-    """Função principal para executar o treinamento do modelo."""
+    """
+    Main function to execute the training process.
+    """
     base_letters_file = "/Users/nicolaslucianobezerra/BreakCapcha/base_letters"
     
-    # Carregar e processar as imagens
+    # Load and preprocess images
     try:
         datas, labels = load_and_preprocess_images(base_letters_file)
     except ValueError as e:
         print(e)
         return
 
-    # Preparar os dados (normalização e divisão)
+    # Prepare data (normalize and split)
     x_train, x_test, y_train, y_test = prepare_data(datas, labels)
     
-    # Construir o modelo
+    # Build the model
     model = build_model()
 
-    # Treinar o modelo
+    # Train the model
     model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=10, batch_size=26, verbose=1)
     
-    # Salvar o modelo treinado
+    # Save the trained model
     model.save('model.keras')
-    print("Modelo treinado e salvo com sucesso!")
+    print("Model trained and saved successfully!")
+
 
 if __name__ == "__main__":
     main()

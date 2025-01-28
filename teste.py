@@ -1,33 +1,46 @@
 import cv2
 from PIL import Image
 
-metodos = [cv2.THRESH_BINARY,
+# List of thresholding methods to test
+methods = [cv2.THRESH_BINARY,
            cv2.THRESH_BINARY_INV,
            cv2.THRESH_TRUNC,
            cv2.THRESH_TOZERO,
            cv2.THRESH_TOZERO_INV]
 
-imagem = cv2.imread('capchas/img1.png', cv2.IMREAD_GRAYSCALE)
-# 2 e 4 são melhores aparentemente
+# Load the image in grayscale mode
+image = cv2.imread('capchas/img1.png', cv2.IMREAD_GRAYSCALE)
+# Note: Methods 2 (THRESH_BINARY_INV) and 4 (THRESH_TOZERO_INV) seem to work better.
 
-i = 0 
+# Counter for naming the processed images
+i = 0
 
-for metodo in metodos:
+# Apply each thresholding method
+for method in methods:
     i += 1
-    _, imagem_tratada = cv2.threshold(imagem, 127, 255, metodo or cv2.THRESH_OTSU)
-    cv2.imshow('imagem', imagem_tratada)
-    cv2.imwrite(f'teste_metodo/imagem_tratada_{i}.png', imagem_tratada)
+    # Apply the current thresholding method with OTSU as a fallback
+    _, processed_image = cv2.threshold(image, 127, 255, method or cv2.THRESH_OTSU)
     
+    # Display the processed image
+    cv2.imshow('Processed Image', processed_image)
     
-    # Kinda useless
-imagem = Image.open ("teste_metodo/imagem_tratada_2.png")
-imagem = imagem.convert("L")
-imagem2 = Image.new("L", imagem.size, 255)
+    # Save the processed image to a file
+    cv2.imwrite(f'teste_metodo/imagem_tratada_{i}.png', processed_image)
 
-for x in range (imagem.size [1]):
-  for y in range (imagem.size[0]):
-    cor_pixel = imagem. getpixel((y, x))
-    if cor_pixel < 115:
-      imagem2. putpixel((y, x), 0)
+# Close all OpenCV windows after processing
+cv2.destroyAllWindows()
 
-imagem2.save("teste_metodo/imagem_final.png")
+# Open the second processed image for additional treatment
+image = Image.open("teste_metodo/imagem_tratada_2.png")
+image = image.convert("L")  # Convert the image to grayscale mode (if not already)
+processed_image_2 = Image.new("L", image.size, 255)  # Create a blank white image
+
+# Perform custom pixel-level processing
+for x in range(image.size[1]):  # Iterate over the rows
+    for y in range(image.size[0]):  # Iterate over the columns
+        pixel_value = image.getpixel((y, x))  # Get the pixel value at (x, y)
+        if pixel_value < 115:  # If the pixel is darker than the threshold
+            processed_image_2.putpixel((y, x), 0)  # Set the pixel to black
+
+# Save the final processed image
+processed_image_2.save("teste_metodo/imagem_final.png")
